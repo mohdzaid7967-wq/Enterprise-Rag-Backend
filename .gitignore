@@ -1,0 +1,19 @@
+# Environments
+enterprise-rag/
+env/
+venv/
+
+# Environment Variables (CRITICAL for security)
+.env
+
+# Python Cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Pytest
+.pytest_cache/
+
+# IDEs (Optional but recommended)
+.vscode/
+.idea/
