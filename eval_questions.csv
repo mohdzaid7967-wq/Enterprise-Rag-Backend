@@ -1,0 +1,21 @@
+id,question,target_keyword,expected_section
+1,What is the primary purpose of the leave policy?,purpose,Purpose
+2,Who is eligible to receive benefits under this policy?,eligibility,Eligibility
+3,What is the scope of employees covered by this document?,scope,Scope
+4,What are the leave entitlements granted to employees?,entitlement,Leave Entitlement
+5,How many days of annual casual leave can an employee take?,casual,Casual Leave
+6,What is the formal procedure to apply for planned leave?,apply,Application Procedure
+7,When is an official medical certificate required for illness?,medical certificate,Sick / Medical Leave
+8,How much advance notice is required before taking annual leave?,advance,Leave Application
+9,Can unused casual leave days be carried forward to next year?,carry forward,Carry Forward Rules
+10,What constitutes unauthorized absence from work?,unauthorized,Absence
+11,What happens if an employee exhausts all allocated leaves?,loss of pay,Unpaid Leave
+12,What is the protocol for emergency or unplanned leave?,emergency,Emergency Leave
+13,Are maternity leave benefits provided to eligible staff?,maternity,Maternity Benefits
+14,What paternity leave duration is granted to new fathers?,paternity,Paternity Benefits
+15,What happens when a public holiday falls during leave?,holiday,Public Holidays
+16,How does leave encashment work upon resignation?,encashment,Encashment
+17,Who has the final authority to approve or deny leave?,manager,Approval Authority
+18,What are the rules regarding remote work and work from home?,remote work,Remote Work Guidelines
+19,What are the consequences for submitting fake medical records?,disciplinary,Disciplinary Action
+20,How often is this corporate policy reviewed and revised?,review,Policy Governance

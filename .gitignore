@@ -17,3 +17,9 @@ __pycache__/
 # IDEs (Optional but recommended)
 .vscode/
 .idea/
+uploads/
+!uploads/.gitkeep
+
+# Evaluation outputs
+reranker_evaluation.csv
+eval_results.csv
