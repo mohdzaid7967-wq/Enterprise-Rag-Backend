@@ -321,107 +321,6 @@ Consistent error format:
 
 ---
 
-## Setup & Installation
-
-### Prerequisites
-- Python 3.11+
-- PostgreSQL 15+ with pgvector extension
-- OpenAI API key (or compatible LLM provider)
-
-### Local Setup
-
-```bash
-# 1. Clone
-git clone <your-repo-url>
-cd enterprise-knowledge-assistant
-
-# 2. Venv
-python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
-
-# 3. Install
-pip install -r requirements.txt
-
-# 4. Env
-cp .env.example .env
-# Edit .env with DB_URL, OPENAI_API_KEY, JWT_SECRET etc.
-
-# 5. Create DB and enable pgvector
-psql -U postgres -c "CREATE DATABASE rag_db;"
-psql -U postgres -d rag_db -c "CREATE EXTENSION vector;"
-
-# 6. Run migrations (if using alembic)
-alembic upgrade head
-
-# 7. Run API
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
-```
-
-Open: http://localhost:8000/docs
-
----
-
-## Docker Setup
-
-```bash
-# Build and run
-docker-compose up --build
-
-# API at http://localhost:8000
-# Docs at http://localhost:8000/docs
-# Postgres at localhost:5432
-```
-
-`docker-compose.yml` includes:
-- `api` service (FastAPI)
-- `db` service (postgres:15 + pgvector)
-- volumes for persistence
-
-To reset:
-```bash
-docker-compose down -v
-docker-compose up --build
-```
-
----
-
-## Environment Variables
-
-Create `.env` from `.env.example`:
-
-```
-DATABASE_URL=postgresql+psycopg2://user:pass@localhost:5432/rag_db
-OPENAI_API_KEY=sk-...
-LLM_MODEL=gpt-4o-mini
-EMBEDDING_MODEL=text-embedding-3-small
-JWT_SECRET_KEY=your-super-secret
-JWT_ALGORITHM=HS256
-ACCESS_TOKEN_EXPIRE_MINUTES=15
-REFRESH_TOKEN_EXPIRE_DAYS=7
-MAX_FILE_SIZE_MB=20
-UPLOAD_DIR=./uploads
-LOG_LEVEL=INFO
-```
-
----
-
-## Testing & Evaluation
-
-```bash
-# Run all tests
-pytest -v
-
-# Run with coverage
-pytest --cov=app --cov-report=html
-
-# Run RAG evaluation
-python scripts/evaluate.py --questions eval_questions.csv
-```
-
-Evaluation output: Hit@5, MRR, avg latency, citation correctness table.
-
----
-
 ## Logging & Security
 
 - Request ID middleware for tracing
@@ -451,51 +350,69 @@ Evaluation output: Hit@5, MRR, avg latency, citation correctness table.
 ## Project Structure
 
 ```
-.
+Enterprise-Rag-Backend/
 ├── app/
-│   ├── main.py              # FastAPI app factory
-│   ├── config.py            # Settings from .env
-│   ├── database.py          # SQLAlchemy engine + session
-│   ├── models/              # users, documents, chunks, conversations, messages
-│   ├── schemas/             # Pydantic request/response models
-│   ├── routers/             # auth, documents, chat, health
-│   ├── services/
-│   │   ├── auth_service.py
-│   │   ├── document_service.py
-│   │   ├── extraction.py
-│   │   ├── chunking.py
-│   │   ├── embedding_service.py
-│   │   ├── vector_search.py
-│   │   ├── reranker.py
-│   │   └── rag_service.py
-│   ├── middleware/          # request_id, logging
-│   └── utils/               # security, file validation
-├── tests/                   # pytest - auth, docs, chat, access control
-├── scripts/
-│   ├── evaluate.py          # RAG evaluation
-│   └── seed.py
-├── uploads/                 # Local file storage (gitignored)
-├── eval_questions.csv       # 20 eval questions
-├── Dockerfile
-├── docker-compose.yml
-├── requirements.txt
+│   ├── __init__.py
+│   ├── chunking.py           # Text extraction, heading detection, and sentence chunker
+│   ├── config.py             # App configurations, secrets, and environment loader
+│   ├── crud.py               # Database CRUD logic and vector similarity queries
+│   ├── database.py           # SQLAlchemy engine and session dependency
+│   ├── embeddings.py         # Local FastEmbed vector generation service
+│   ├── exceptions.py         # Standardized JSON error response handlers
+│   ├── generator.py          # Google Gemini synthesis with anti-hallucination guardrails
+│   ├── logging_config.py     # Request ID tracking, timing middleware, and log scrubbing
+│   ├── main.py               # FastAPI application, route declarations, and lifecycle
+│   ├── models.py             # SQLAlchemy models (User, Document, Chunk, Conversation, Message)
+│   ├── reranker.py           # Cross-encoder candidate reranking pipeline
+│   ├── schemas.py            # Pydantic request, response, and pagination models
+│   ├── security.py           # Password hashing, JWT token creation, and auth dependencies
+│   └── tasks.py              # Background worker for async document ingestion
+├── test/
+│   ├── __init__.py
+│   └── test_main.py          # Automated Pytest suite (Auth, upload, CRUD, tenant isolation)
+├── uploads/                  # Managed storage directory for uploaded files
+├── .dockerignore
 ├── .env.example
-└── README.md
-```
-
----
+├── .gitignore
+├── check_db.py               # Diagnostic script for database verification
+├── docker-compose.yml        # Multi-container orchestration (API + PostgreSQL)
+├── Dockerfile                # Production container definition
+├── eval_questions.csv        # 20-question RAG benchmark dataset
+├── eval_results.csv          # Evaluation output logs (Hit@5, MRR, Latency)
+├── evaluate_reranker.py      # Reranker comparative evaluation script
+├── pyproject.toml            # Project configuration and Pytest settings
+├── README.md                 # Complete documentation
+├── requirements.txt          # Production and development dependencies
+└── run_evaluation.py         # Benchmark harness runner
 
 ## Future Improvements
+Frontend User Interface (UI)
 
-- Background jobs with Celery / FastAPI BackgroundTasks for large doc processing
-- S3 storage instead of local uploads
-- Hybrid search (BM25 + vector)
-- Role-based access for shared company docs
-- Frontend (React) for upload + chat
-- Streaming responses
-- Redis cache for embeddings
+Ek modern web interface (Next.js / React ya Streamlit) integrate karna jahan normal user direct drag-and-drop karke documents upload kar sake aur real-time chat interface mein citations dekh sake.
 
+Hybrid Search (BM25 + Dense Vector Search)
+
+Abhi search pure vector-based dense embeddings par chal rahi hai. BM25 (keyword search) aur vector search ko milakar Reciprocal Rank Fusion (RRF) lagana taaki specific policy codes, exact abbreviations aur acronyms aur behtar match ho sakein.
+
+Advanced Table & Image Extraction (Multimodal RAG)
+
+Policy documents ke complex tabular data aur flowchart images ko preserve karne ke liye OCR aur specialized markdown table parsers (jaise unstructured ya layout-aware parsers) ka use karna.
+
+Query Expansion & Semantic Routing
+
+User ke short ya confusing sawalon ko pehle LLM se expand/rephrase karwana (e.g., "WFH rules" ko "work from home / remote work policy guidelines" mein expand karna) taaki candidate retrieval 100% accurate rahe.
+
+Asynchronous Background Workers (Celery / Redis)
+
+Badi files (100+ pages PDF) ko process karne ke liye background task queue (Celery + Redis) implement karna taaki upload request instantly return ho aur heavy chunking background mein chalti rahe.
+
+Streaming Responses (Server-Sent Events / WebSockets)
+
+Assistant answers ke liye token-by-token streaming response dena taaki user ko pura answer generate hone tak wait na karna pade aur frontend par ChatGPT jaisa real-time typing effect mile.
+
+Production Caching Layer
+
+Repeat hone wale questions aur unke embeddings ko Redis cache mein save karna taaki duplicate queries ka answer 0ms database lookup aur zero LLM cost ke sath instant return ho jaye.
 ---
 
 **Author:** Mohd Zaid 
-**Stack:** FastAPI + PostgreSQL + pgvector + Docker  
